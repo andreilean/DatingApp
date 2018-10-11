@@ -60,7 +60,8 @@ namespace DatingApp.API
             }
 
         //    app.UseHttpsRedirection();
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyMethod());
+             app.UseCors(x => x.WithOrigins("http://localhost:4200")
+                .AllowAnyMethod().AllowAnyHeader().AllowCredentials());
             app.UseAuthentication();
             app.UseMvc();
         }
