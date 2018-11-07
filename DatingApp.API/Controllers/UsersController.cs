@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DatingApp.API.Controllers
 {
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -32,7 +34,7 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet("{id}", Name = "GetUser")]
-        public async Task<ActionResult> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
             var user = await _repo.GetUser(id);
 
@@ -41,7 +43,7 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpPut("{id}")] 
-        public async Task<ActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto) {
+        public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto) {
             if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
             var userFromRepo = await _repo.GetUser(id);
