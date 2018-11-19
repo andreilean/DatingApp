@@ -50,7 +50,7 @@ namespace DatingApp.API.Data
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)
         {
-            var users = _context.Users.Include(p => p.Photos).OrderByDescending(u => u.LastActive).AsQueryable();
+            var users = _context.Users.AsQueryable();
 
             users = users.Where(u => u.Id != userParams.UserId);
             users = users.Where(u => u.Gender == userParams.Gender);
@@ -82,9 +82,14 @@ namespace DatingApp.API.Data
                         users = users.OrderByDescending(u => u.LastActive);
                         break;
                 }
+
+            } else
+            {
+                users = users.OrderByDescending(u => u.LastActive);
             }
 
-            return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
+            //return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
+            return await PagedList<User>.CreateWithExpressionAsync(users, p => p.Photos, userParams.PageNumber, userParams.PageSize);
         }
 
         private async Task<IEnumerable<int>> GetUserLikes(int id, bool likers)   
