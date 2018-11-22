@@ -1,0 +1,19 @@
+
+.card-img-wrapper {
+    overflow: hidden;
+    position: relative;
+}
+
+.member-icons {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-right: auto;
+    margin-left: auto;
+    opacity: 0;
+}
+
+.card-img-wrapper:hover .member-icons {
+    bottom: 0;
+    opacity: 1;
+}

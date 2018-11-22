@@ -34,6 +34,9 @@ namespace DatingApp.API.Data
                     .IsRequired();
             });
 
+            builder.Entity<Photo>().
+                HasQueryFilter(p => p.IsApproved);
+
             builder.Entity<Like>().
                 HasKey(k => new {k.LikerId, k.LikeeId});
             builder.Entity<Like>().

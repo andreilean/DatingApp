@@ -36,15 +36,31 @@ namespace DatingApp.API.Data
             return await _context.Photos.FirstOrDefaultAsync(u => u.UserId == userId && u.IsMain);
         }
 
+        public void ApprovePhoto(int photoId)
+        {
+            var photo = this.GetPhoto(photoId).Result;
+            if (photo != null) {
+                photo.IsApproved = true;
+            }
+        }
+
         public async Task<Photo> GetPhoto(int id)
         {
-            var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id==id);
+            Photo photo = null;
+
+            photo = await _context.Photos.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id==id);
+            // else
+            //     photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id==id);
             return photo;
         }
 
-        public async Task<User> GetUser(int id)
+        public async Task<User> GetUser(int id, bool includePendingPhotos = false)
         {
-            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Id == id);
+            User user;
+            if (includePendingPhotos)
+                user = await _context.Users.Include(p => p.Photos).IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == id);
+            else
+                user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Id == id);
             return user;
         }
 
@@ -152,6 +168,11 @@ namespace DatingApp.API.Data
                 .OrderByDescending(m => m.MessageSent)
                 .ToListAsync(); 
             return messages;
+        }
+
+        public async Task<List<Photo>> GetPhotosForModeration()
+        {
+            return await _context.Photos.Include(p => p.User).IgnoreQueryFilters().Where(p => !p.IsApproved).OrderBy(p => p.DateAdded).ToListAsync();            
         }
     }
 }

@@ -38,6 +38,7 @@ import { UserManagementComponent } from './admin/user-management/user-management
 import { PhotoManagementComponent } from './admin/photo-management/photo-management.component';
 import { AdminService } from './_services/admin.service';
 import { RolesModalComponent } from './admin/roles-modal/roles-modal.component';
+import { PhotoCardComponent } from './admin/photo-card/photo-card.component';
 
 
 export function tokenGetter() {
@@ -58,6 +59,7 @@ export function tokenGetter() {
       MemberMessagesComponent,
       PhotoEditorComponent,
       PhotoManagementComponent,
+      PhotoCardComponent,
       RolesModalComponent,
       UserManagementComponent,
       ListsComponent,

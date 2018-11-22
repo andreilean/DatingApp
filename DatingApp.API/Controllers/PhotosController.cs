@@ -52,7 +52,7 @@ namespace DatingApp.API.Controllers
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
-            var userFromRepo = await _repo.GetUser(userId);
+            var userFromRepo = await _repo.GetUser(userId, true);
 
             var file = photoForCreationDto.File;
             var uploadResult = new ImageUploadResult();
@@ -76,9 +76,6 @@ namespace DatingApp.API.Controllers
 
             var photo = _mapper.Map<Photo>(photoForCreationDto);
 
-            if (!userFromRepo.Photos.Any(u => u.IsMain))
-                photo.IsMain = true;
-            
             userFromRepo.Photos.Add(photo);
 
             if (await _repo.SaveAll()) {
@@ -96,18 +93,22 @@ namespace DatingApp.API.Controllers
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
 
-            var user = await _repo.GetUser(userId);
+            var user = await _repo.GetUser(userId, true);
 
             if (!user.Photos.Any(p => p.Id == id))
                 return Unauthorized();
 
             var photoFromRepo = await _repo.GetPhoto(id);
 
+            if (!photoFromRepo.IsApproved)
+                return BadRequest("Can not set unverified photo as main");
+
             if (photoFromRepo.IsMain)
                 return BadRequest("This is already the main photo");
 
             var currentMainPhoto = await _repo.GetMainPhotoForUser(userId);
-            currentMainPhoto.IsMain = false;
+            if (currentMainPhoto != null)
+                currentMainPhoto.IsMain = false;
 
             photoFromRepo.IsMain = true;
 
@@ -122,7 +123,7 @@ namespace DatingApp.API.Controllers
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
 
-            var user = await _repo.GetUser(userId);
+            var user = await _repo.GetUser(userId, true);
 
             if (!user.Photos.Any(p => p.Id == id))
                 return Unauthorized();

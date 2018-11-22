@@ -1,0 +1,11 @@
+<h3 class="card-title text-left mb-1">{{photo.userName}}</h3>
+<div class="card mb-1">
+    <div class="card-img-wrapper">
+      <img class="card-img-top" src="{{photo.url}}" alt="{{photo.description}}">
+    </div>
+</div>
+<ul class="list-inline text-center mt-1">
+    <li class="list-inline-item"><button class="btn btn-success btn-sm" (click)="approve()">Approve</button></li>
+    <li class="list-inline-item"><button class="btn btn-danger btn-sm" (click)="reject()">Reject</button></li>
+</ul>    
+

@@ -3,6 +3,16 @@ img.img-thumbnail {
     min-width: 100px !important;
     margin-bottom: 2px;
 }
+
+img.waiting {
+    opacity: 0.2;
+}
+
+div.waiting {
+    position: absolute;
+    top: 10px;
+}
+
 .nv-file-over {
     border: dotted 3px red;
 }

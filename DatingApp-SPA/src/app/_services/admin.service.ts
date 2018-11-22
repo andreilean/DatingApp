@@ -14,8 +14,22 @@ export class AdminService {
     return this.http.get(this.baseUrl + 'admin/usersWithRoles');
   }
 
-  updateUserRoles(user: User, roles:{}) {
+  updateUserRoles(user: User, roles: {}) {
     return this.http.post(this.baseUrl + 'admin/editRoles/' + user.userName, roles);
   }
+
+  getPhotosForModeration() {
+    return this.http.get(this.baseUrl + 'admin/photosForModeration');
+  }
+
+  approvePhoto(id: number) {
+    return this.http.post(this.baseUrl + 'admin/approvePhoto/' + id, {});
+  }
+
+  rejectPhoto(id: number) {
+    return this.http.post(this.baseUrl + 'admin/rejectPhoto/' + id, {});
+  }
+
+
 
 }

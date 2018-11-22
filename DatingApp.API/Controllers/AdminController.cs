@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using DatingApp.API.Dtos;
 using Microsoft.AspNetCore.Identity;
 using DatingApp.API.Models;
+using AutoMapper;
+using System.Collections.Generic;
 
 namespace DatingApp.API.Controllers
 {
@@ -16,8 +18,12 @@ namespace DatingApp.API.Controllers
     {
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
-        public AdminController(DataContext context, UserManager<User> userManager)
+        private readonly IDatingRepository _repo;
+        private readonly IMapper _mapper;
+        public AdminController(DataContext context, UserManager<User> userManager, IDatingRepository repo, IMapper mapper)
         {
+            _mapper = mapper;
+            _repo = repo;
             _userManager = userManager;
             _context = context;
         }
@@ -53,15 +59,17 @@ namespace DatingApp.API.Controllers
 
             var selectedRoles = roleEditDto.RoleNames;
 
-            selectedRoles = selectedRoles ?? new string[] {};
+            selectedRoles = selectedRoles ?? new string[] { };
 
             var result = await _userManager.AddToRolesAsync(user, selectedRoles.Except(userRoles));
-            if (!result.Succeeded) {
+            if (!result.Succeeded)
+            {
                 return BadRequest("Failed to add roles");
             }
 
             result = await _userManager.RemoveFromRolesAsync(user, userRoles.Except(selectedRoles));
-            if (!result.Succeeded) {
+            if (!result.Succeeded)
+            {
                 return BadRequest("Failed to remove roles");
             }
 
@@ -70,9 +78,48 @@ namespace DatingApp.API.Controllers
 
         [Authorize(Policy = "ModeratePhotoRole")]
         [HttpGet("photosForModeration")]
-        public IActionResult GetPhotosForModeration()
+        public async Task<IActionResult> GetPhotosForModeration()
         {
-            return Ok("Admin or Moderators can see this");
+            var photos = await _repo.GetPhotosForModeration();
+            var photosToReturn = _mapper.Map<IEnumerable<PhotoForReturnDto>>(photos);
+            return Ok(photosToReturn);
+        }
+
+        [Authorize(Policy = "ModeratePhotoRole")]
+        [HttpPost("approvePhoto/{photoId}")]
+        public async Task<IActionResult> ApprovePhoto(int photoId)
+        {
+            var photo = await _repo.GetPhoto(photoId);
+            if (photo == null)
+                return NotFound("Photo with id=" + photoId + " does not exist");
+
+            if (photo.IsApproved)
+                return BadRequest("This photo is already approved.");
+
+            _repo.ApprovePhoto(photoId);
+
+            if (await _repo.SaveAll())
+                return Ok();
+
+            return BadRequest("Failed to approve photo");
+        }
+        
+        [Authorize(Policy = "ModeratePhotoRole")]
+        [HttpPost("rejectPhoto/{photoId}")]
+        public async Task<IActionResult> RejectPhoto(int photoId)
+        {
+            var photo = await _repo.GetPhoto(photoId);
+            if (photo == null)
+                return NotFound("Photo with id=" + photoId + " does not exist");
+
+            _repo.Delete(photo);
+
+            if (await _repo.SaveAll())
+                return Ok();
+
+            return BadRequest("Failed to reject photo");
         }
     }
+
+
 }

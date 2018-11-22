@@ -15,6 +15,7 @@ namespace DatingApp.API.Controllers
     [ServiceFilter(typeof(LogUserActivity))]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IDatingRepository _repo;
@@ -47,6 +48,16 @@ namespace DatingApp.API.Controllers
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _repo.GetUser(id);
+
+            var userToReturn = _mapper.Map<UserForDetailedDto>(user);
+            return Ok(userToReturn);
+        }
+
+        [HttpGet("Self")]
+        public async Task<IActionResult> GetSelfUser()
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var user = await _repo.GetUser(currentUserId, true);
 
             var userToReturn = _mapper.Map<UserForDetailedDto>(user);
             return Ok(userToReturn);
